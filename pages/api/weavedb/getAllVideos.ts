@@ -11,6 +11,8 @@ export default async function handler(
   }
   try {
     const { playlistId } = req.body;
+    console.log(playlistId);
+    
     const contractTxId = process.env.CONTRACT_TXN_ID;
     const db = new WeaveDB({ contractTxId: contractTxId });
     await db.init();
