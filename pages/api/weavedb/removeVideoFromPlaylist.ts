@@ -9,7 +9,7 @@ export default async function handler(
       res.status(200).json({ message: "Method not allowed" });
       return;
     }
-    const { playlistId, publicationId } = req.body;
+    const { playlistId, publicationId, cover, profileId } = req.body;
     const contractTxId = process.env.CONTRACT_TXN_ID;
     const signer_wallet = process.env.SIGNER;
     const privateKey = process.env.WEAVE_KEY;
@@ -33,7 +33,9 @@ export default async function handler(
 
       const publicationIds = isInPlaylist[0].publicationId;
 
-      const newPublications = publicationIds.filter((id) => {
+      const isPlaylistCover = publicationIds[0] === publicationId;
+
+      const newPublications = publicationIds.filter((id, index) => {
         return id != publicationId;
       });
 
@@ -48,6 +50,34 @@ export default async function handler(
           privateKey: privateKey,
         }
       );
+
+      if (isPlaylistCover) {
+        console.log("Video is the cover of the playlist");
+
+        const isInCreators = await db.get(
+          "Creators",
+          ["profileId"],
+          ["profileId", "==", profileId]
+        );
+        const playlists = isInCreators[0].playlist;
+
+        const updatedPlaylists = playlists.map((playlist) =>
+          playlist.playlistId === playlistId
+            ? { ...playlist, cover: cover }
+            : playlist
+        );
+        const result = await db.update(
+            { playlist: updatedPlaylists },
+            "Creators",
+            profileId,
+            {
+              wallet: signer_wallet,
+              privateKey: privateKey,
+            }
+          );
+          console.log('Playlist Cover Updated');
+          
+      }
     }
 
     res.status(200).send("Successfully removed video");
