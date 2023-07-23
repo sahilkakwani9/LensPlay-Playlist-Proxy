@@ -22,6 +22,8 @@ export default async function handler(
       ["playlistId"],
       ["playlistId", "==", playlistId]
     );
+    console.log(data, 'yeh hai');
+    
 
     res.status(200).json({ data: data });
   } catch (error) {
