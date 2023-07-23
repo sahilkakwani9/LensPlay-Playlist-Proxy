@@ -49,23 +49,33 @@ export default async function handler(
 
       const publicationIds = isInPlaylist[0].publicationId;
 
-      publicationIds.push(publicationId);
+      const isInArray = publicationIds.includes(publicationId);
+      if (isInArray) {
+        res.status(200).json({
+          data: "Already in Playlist"
+        });
+        return;
+      }
+      else {
+        publicationIds.push(publicationId);
 
-      const result = await db.update(
-        {
-          publicationId: publicationIds,
-        },
-        "Playlists",
-        playlistId,
-        {
-          wallet: signer_wallet,
-          privateKey: privateKey,
-        }
-      );
-      console.log(result);
+        const result = await db.update(
+          {
+            publicationId: publicationIds,
+          },
+          "Playlists",
+          playlistId,
+          {
+            wallet: signer_wallet,
+            privateKey: privateKey,
+          }
+        );
+        res.status(200).json({
+          data: "Successfully added to Playlist"
+        });
+      }
     }
 
-    res.status(200).send("Successfully added video");
   } catch (error) {
     res.status(400).send("error: " + error);
   }
